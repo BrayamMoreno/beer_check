@@ -6,8 +6,11 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# --- Servidor nginx: sirve la PWA y hace de proxy al backend ---
-FROM nginx:1.27-alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 19821 80
+# --- Servidor ligero Node.js para servir la SPA/PWA ---
+FROM node:22-alpine
+WORKDIR /app
+RUN npm install -g serve
+COPY --from=build /app/dist ./dist
+
+EXPOSE 19821
+CMD ["serve", "-s", "dist", "-l", "19821"]

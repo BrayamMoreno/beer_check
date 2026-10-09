@@ -27,9 +27,6 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-19821}:19821"
-    volumes:
-      - media_data:/vol/media:ro
-      - static_data:/vol/static:ro
     networks:
       - proxy_network
     depends_on:

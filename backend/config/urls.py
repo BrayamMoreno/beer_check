@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
@@ -11,6 +12,7 @@ router.register("tipos", TipoLicorViewSet, basename="tipo")
 router.register("licores", LicorViewSet, basename="licor")
 
 urlpatterns = [
+    path("", lambda request: redirect("admin/", permanent=False)),
     path("admin/", admin.site.urls),
     path("api/config/", config),
     path("api/", include(router.urls)),
