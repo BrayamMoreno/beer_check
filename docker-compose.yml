@@ -1,0 +1,46 @@
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-19820}:19820"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DJANGO_DEBUG: "0"
+    volumes:
+      - sqlite_data:/data
+      - media_data:/vol/media
+      - static_data:/vol/static
+    networks: # para hablar con db / proxy
+      - proxy_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:19820/api/config/')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-19821}:19821"
+    volumes:
+      - media_data:/vol/media:ro
+      - static_data:/vol/static:ro
+    networks:
+      - proxy_network
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  sqlite_data:
+  media_data:
+  static_data:
+
+networks:
+  proxy_network:
+    external: true
