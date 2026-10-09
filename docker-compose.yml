@@ -27,6 +27,8 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-19821}:19821"
+    environment:
+      BACKEND_URL: "http://backend:19820"
     networks:
       - proxy_network
     depends_on:
