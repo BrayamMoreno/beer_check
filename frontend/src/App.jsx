@@ -189,12 +189,13 @@ export default function App() {
             onReiniciarPh={handleConsultarPh}
             onVolverTipo={handleVolverTipo}
             onVolverLicor={handleVolverLicor}
+            onNavigateTab={setActiveTab}
           />
         )}
 
-        {activeTab === 'inspeccion' && <InspeccionTab />}
+        {activeTab === 'inspeccion' && <InspeccionTab onNavigateTab={setActiveTab} />}
 
-        {activeTab === 'emergencia' && <EmergenciaTab />}
+        {activeTab === 'emergencia' && <EmergenciaTab onNavigateTab={setActiveTab} />}
       </main>
 
       {/* Barra de navegación inferior persistente (Croquis) */}

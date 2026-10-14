@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { IconTorch, IconAlert, IconCheck } from '../icons'
 
-export default function InspeccionTab() {
+export default function InspeccionTab({ onNavigateTab }) {
   const [linternaEncendida, setLinternaEncendida] = useState(false)
   const [modoContraluz, setModoContraluz] = useState(false)
   const [fondoContraluz, setFondoContraluz] = useState('blanco') // 'blanco' | 'negro'
@@ -240,6 +240,26 @@ export default function InspeccionTab() {
             </p>
           </>
         )}
+      </div>
+
+      {/* Navegación al paso siguiente y anterior */}
+      <div className="step-forward-card">
+        <button
+          id="btn-siguiente-paso-emergencia"
+          className="btn danger btn-next-step"
+          onClick={() => onNavigateTab?.('emergencia')}
+        >
+          <span>Pasar al siguiente paso: Emergencia y síntomas</span>
+          <span className="next-arrow-icon">→</span>
+        </button>
+        <div className="step-backward-row">
+          <button
+            className="btn-link-step"
+            onClick={() => onNavigateTab?.('verificar')}
+          >
+            ← Volver al Paso 2: Verificar
+          </button>
+        </div>
       </div>
 
       <div className="step-tag-footer">3 · Inspección</div>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { IconQr, IconCheck, IconAlert, IconInfo, IconChevron, IconExternal, IconSearch } from '../icons'
 import ResultadoPh, { Thumb } from './ResultadoPh'
 
@@ -21,140 +21,31 @@ export default function VerificarTab({
   onReiniciarPh,
   onVolverTipo,
   onVolverLicor,
+  onNavigateTab,
 }) {
   const [activeSubView, setActiveSubView] = useState('escaner') // 'escaner' | 'catalogo'
-  const [codigoInput, setCodigoInput] = useState('')
   const [resultadoEscaner, setResultadoEscaner] = useState(null) // null | 'coincide' | 'no-coincide' | 'no-verificado'
-  const [codigoEscaneado, setCodigoEscaneado] = useState('')
   const [checklistAbierto, setChecklistAbierto] = useState(false)
-  const [camaraActiva, setCamaraActiva] = useState(false)
-  const [camaraError, setCamaraError] = useState('')
-  const [linternaEscaner, setLinternaEscaner] = useState(false)
 
-  const videoRef = useRef(null)
-  const streamRef = useRef(null)
+  const handleSeleccionarResultado = (res) => {
+    setResultadoEscaner(res)
+  }
 
-  // Apagar la cámara al desmontar
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop())
-      }
-    }
-  }, [])
-
-  // Iniciar cámara web para escanear
-  const toggleCamara = async () => {
-    if (camaraActiva) {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop())
-        streamRef.current = null
-      }
-      setCamaraActiva(false)
-      setLinternaEscaner(false)
-      return
-    }
-
-    setCamaraError('')
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error('La cámara no está disponible en este dispositivo o navegador.')
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+  const licoresFiltrados = licor
+    ? []
+    : licores.filter((l) => {
+        const q = busqueda.trim().toLowerCase()
+        return q ? `${l.nombre} ${l.marca}`.toLowerCase().includes(q) : true
       })
-      streamRef.current = stream
-      setCamaraActiva(true)
-
-      // Conectar con el elemento video tras el re-render
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          videoRef.current.play().catch(() => {})
-        }
-      }, 100)
-
-      // Si existe BarcodeDetector, intentar detección automática
-      if ('BarcodeDetector' in window) {
-        const detector = new window.BarcodeDetector({ formats: ['qr_code', 'code_128', 'ean_13'] })
-        const interval = setInterval(async () => {
-          if (!videoRef.current || !streamRef.current) {
-            clearInterval(interval)
-            return
-          }
-          try {
-            const barcodes = await detector.detect(videoRef.current)
-            if (barcodes.length > 0) {
-              const code = barcodes[0].rawValue
-              clearInterval(interval)
-              verificarCodigoTexto(code)
-            }
-          } catch {
-            // Continúa intentando
-          }
-        }, 600)
-      }
-    } catch (err) {
-      setCamaraError(err.message || 'No se pudo acceder a la cámara. Revisa los permisos.')
-      setCamaraActiva(false)
-    }
-  }
-
-  // Linterna en cámara del escáner
-  const toggleLinternaEscaner = async () => {
-    if (!streamRef.current) return
-    const track = streamRef.current.getVideoTracks()[0]
-    if (!track) return
-
-    try {
-      const caps = track.getCapabilities ? track.getCapabilities() : {}
-      if (!caps.torch) {
-        alert('Este dispositivo no soporta encendido de linterna mediante el navegador.')
-        return
-      }
-      const nuevoEstado = !linternaEscaner
-      await track.applyConstraints({ advanced: [{ torch: nuevoEstado }] })
-      setLinternaEscaner(nuevoEstado)
-    } catch {
-      alert('No se pudo activar la linterna de la cámara.')
-    }
-  }
-
-  const verificarCodigoTexto = (codigo) => {
-    const clean = codigo.trim().toUpperCase()
-    if (!clean) return
-    setCodigoEscaneado(clean)
-
-    // Lógica inteligente de verificación:
-    // Lotes oficiales simulados o patrones válidos de estampillas (ej: letras + números)
-    if (clean.includes('FAIL') || clean.includes('FALSO') || clean === '99999' || clean === '00000') {
-      setResultadoEscaner('no-coincide')
-    } else if (clean.length < 4 || clean === '1234') {
-      setResultadoEscaner('no-verificado')
-    } else {
-      setResultadoEscaner('coincide')
-    }
-  }
-
-  const handleVerificarManual = (e) => {
-    e.preventDefault()
-    if (!codigoInput.trim()) return
-    verificarCodigoTexto(codigoInput)
-  }
-
-  const licoresFiltrados = licor ? [] : licores.filter((l) => {
-    const q = busqueda.trim().toLowerCase()
-    return q ? `${l.nombre} ${l.marca}`.toLowerCase().includes(q) : true
-  })
 
   return (
     <div className="tab-pane verificar-pane fade-in">
       <div className="tab-header">
         <h1>Verificar</h1>
-        <p className="tab-subtitle">Validación de código de estampilla y lote</p>
+        <p className="tab-subtitle">Validación del código de la botella con SycTrace</p>
       </div>
 
-      {/* Selector de sub-vista: Escáner QR vs Catálogo y pH */}
+      {/* Selector de sub-vista: Escáner externo vs Catálogo y pH */}
       <div className="view-switch-pills">
         <button
           id="btn-subview-escaner"
@@ -174,20 +65,24 @@ export default function VerificarTab({
 
       {activeSubView === 'escaner' && (
         <div className="escaner-section fade-in">
-          {/* Cuadro de cámara / Escáner del croquis */}
+          {/* Tarjeta del visor de escaneo externo (fiel al croquis) */}
           <div className="scanner-viewfinder-card">
-            <div className={`scanner-viewfinder ${camaraActiva ? 'camera-on' : ''}`}>
-              {camaraActiva ? (
-                <video ref={videoRef} playsInline autoPlay muted className="scanner-video" />
-              ) : (
-                <div className="viewfinder-placeholder">
-                  <div className="viewfinder-icon-wrap">
-                    <IconQr className="viewfinder-icon" />
-                  </div>
-                  <strong className="viewfinder-title">Apunta al QR</strong>
-                  <p className="viewfinder-hint">Ubica el código de la estampilla dentro del marco</p>
+            <div
+              className={`scanner-viewfinder external-scanner ${abrioSyctrace ? 'camera-on' : ''}`}
+              onClick={onAbrirSyctrace}
+              title="Abrir SycTrace para escanear"
+            >
+              <div className="viewfinder-placeholder">
+                <div className="viewfinder-icon-wrap external-pulse">
+                  <IconQr className="viewfinder-icon" />
                 </div>
-              )}
+                <strong className="viewfinder-title">Apunta al QR</strong>
+                <p className="viewfinder-hint">
+                  {abrioSyctrace
+                    ? '✓ Escáner abierto en SycTrace. Toca para abrir de nuevo si lo necesitas.'
+                    : 'Escaneo con la aplicación oficial SycTrace'}
+                </p>
+              </div>
 
               <div className="scanner-corner tl" />
               <div className="scanner-corner tr" />
@@ -196,90 +91,43 @@ export default function VerificarTab({
               <div className="scanner-laser" />
             </div>
 
-            <div className="scanner-actions-bar">
+            {/* Botón principal de apertura de aplicación externa */}
+            <div className="scanner-external-launch-wrap">
               <button
-                id="btn-toggle-camara"
-                className={`btn-action-small ${camaraActiva ? 'active' : ''}`}
-                onClick={toggleCamara}
+                id="btn-abrir-escaner-externo"
+                className={`btn primary btn-launch-external ${volvio ? 'pulse' : ''}`}
+                onClick={onAbrirSyctrace}
               >
-                {camaraActiva ? 'Detener cámara' : 'Abrir cámara'}
+                <IconExternal className="icon-btn-lead" />
+                <span>{abrioSyctrace ? 'Abrir SycTrace de nuevo ↗' : 'Escanear en SycTrace ↗'}</span>
               </button>
-              {camaraActiva && (
-                <button
-                  id="btn-linterna-escaner"
-                  className={`btn-action-small ${linternaEscaner ? 'active' : ''}`}
-                  onClick={toggleLinternaEscaner}
-                >
-                  {linternaEscaner ? '🔦 Apagar flash' : '🔦 Encender flash'}
-                </button>
-              )}
+              <small className="external-app-notice">
+                {abrioSyctrace
+                  ? 'Verifica el código en SycTrace y selecciona abajo qué resultado obtuviste.'
+                  : `Se abrirá la plataforma oficial (${syctraceUrl}) en una nueva pestaña.`}
+              </small>
             </div>
-
-            {camaraError && <p className="scanner-error-msg">{camaraError}</p>}
-          </div>
-
-          {/* Formulario de ingreso manual */}
-          <form className="manual-code-form" onSubmit={handleVerificarManual}>
-            <label htmlFor="input-codigo-lote" className="code-label">
-              O ingresa el código de estampilla manualmente:
-            </label>
-            <div className="code-input-row">
-              <input
-                id="input-codigo-lote"
-                type="text"
-                className="code-input"
-                placeholder="Ej. ANT-2024-94812 o LOTE-481"
-                value={codigoInput}
-                onChange={(e) => setCodigoInput(e.target.value)}
-              />
-              <button id="btn-comprobar-codigo" type="submit" className="btn-code-submit">
-                Verificar
-              </button>
-            </div>
-          </form>
-
-          {/* Simulador rápido para pruebas */}
-          <div className="demo-chips-row">
-            <span className="demo-chips-label">Probar ejemplo:</span>
-            <button
-              type="button"
-              className="chip-btn chip-ok"
-              onClick={() => {
-                setCodigoInput('COL-2024-81729')
-                verificarCodigoTexto('COL-2024-81729')
-              }}
-            >
-              Lote oficial
-            </button>
-            <button
-              type="button"
-              className="chip-btn chip-fail"
-              onClick={() => {
-                setCodigoInput('FAIL-999-DUB')
-                verificarCodigoTexto('FAIL-999-DUB')
-              }}
-            >
-              Lote alterado
-            </button>
-            <button
-              type="button"
-              className="chip-btn chip-warn"
-              onClick={() => {
-                setCodigoInput('12')
-                verificarCodigoTexto('12')
-              }}
-            >
-              No verificado
-            </button>
           </div>
 
           {/* Posibles resultados del croquis */}
           <div className="posibles-resultados-box">
-            <h3 className="section-title">Posibles resultados</h3>
+            <div className="section-title-row">
+              <h3 className="section-title">Posibles resultados</h3>
+              {abrioSyctrace && <span className="badge-select-hint">Selecciona tu resultado</span>}
+            </div>
+
+            <p className="results-intro-text">
+              ¿Qué indicó la consulta en la aplicación externa?
+            </p>
+
             <div className="results-pills-container">
+              {/* Opción 1: Coincide con el lote (Verde) */}
               <div
+                id="pill-resultado-coincide"
                 className={`result-pill pill-match ${resultadoEscaner === 'coincide' ? 'selected' : ''}`}
-                onClick={() => setResultadoEscaner('coincide')}
+                onClick={() => handleSeleccionarResultado('coincide')}
+                role="button"
+                tabIndex={0}
               >
                 <div className="result-pill-indicator">
                   <IconCheck />
@@ -288,11 +136,16 @@ export default function VerificarTab({
                   <strong>Coincide con el lote</strong>
                   <p>Estampilla registrada y autorizada para distribución legal.</p>
                 </div>
+                {resultadoEscaner === 'coincide' && <span className="pill-check-badge">✓</span>}
               </div>
 
+              {/* Opción 2: No coincide (Rojo) */}
               <div
+                id="pill-resultado-no-coincide"
                 className={`result-pill pill-no-match ${resultadoEscaner === 'no-coincide' ? 'selected' : ''}`}
-                onClick={() => setResultadoEscaner('no-coincide')}
+                onClick={() => handleSeleccionarResultado('no-coincide')}
+                role="button"
+                tabIndex={0}
               >
                 <div className="result-pill-indicator">
                   <IconAlert />
@@ -301,11 +154,16 @@ export default function VerificarTab({
                   <strong>No coincide</strong>
                   <p>Inconsistencia detectada o código reportado como adulterado.</p>
                 </div>
+                {resultadoEscaner === 'no-coincide' && <span className="pill-check-badge">✓</span>}
               </div>
 
+              {/* Opción 3: No se pudo verificar (Naranja) */}
               <div
+                id="pill-resultado-no-verificado"
                 className={`result-pill pill-unverified ${resultadoEscaner === 'no-verificado' ? 'selected' : ''}`}
-                onClick={() => setResultadoEscaner('no-verificado')}
+                onClick={() => handleSeleccionarResultado('no-verificado')}
+                role="button"
+                tabIndex={0}
               >
                 <div className="result-pill-indicator">
                   <IconInfo />
@@ -314,30 +172,26 @@ export default function VerificarTab({
                   <strong>No se pudo verificar</strong>
                   <p>Código no encontrado en el sistema o registro ilegible.</p>
                 </div>
+                {resultadoEscaner === 'no-verificado' && <span className="pill-check-badge">✓</span>}
               </div>
             </div>
 
+            {/* Mensaje de orientación según el resultado marcado */}
             {resultadoEscaner && (
               <div className={`active-scan-report alert-${resultadoEscaner}`}>
-                <strong>Código consultado: {codigoEscaneado || codigoInput || 'Muestra'}</strong>
+                <strong>
+                  {resultadoEscaner === 'coincide' && '✅ Verificación exitosa en SycTrace'}
+                  {resultadoEscaner === 'no-coincide' && '🚨 ¡ALERTA! Código no coincide en SycTrace'}
+                  {resultadoEscaner === 'no-verificado' && '⚠️ Verificación no confirmada'}
+                </strong>
                 <p>
                   {resultadoEscaner === 'coincide' &&
-                    '✅ El código coincide con los registros oficiales de rentas departamentales.'}
+                    'El lote y registro sanitario corresponden a los datos de la gobernación. Continúa con la inspección física de la botella.'}
                   {resultadoEscaner === 'no-coincide' &&
-                    '🚨 ATENCIÓN: El código NO coincide con la base oficial. Posible botella adulterada.'}
+                    '¡Cuidado! Este código no pertenece al producto o no está autorizado. NO consumas esta bebida.'}
                   {resultadoEscaner === 'no-verificado' &&
-                    '⚠️ El código no pudo ser verificado. Realiza inspección física y revisa la estampilla.'}
+                    'No se pudo confirmar en la base de datos oficial. Es fundamental realizar la inspección visual con linterna a contraluz.'}
                 </p>
-                <div className="scan-report-actions">
-                  <a
-                    href={syctraceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-syctrace-link"
-                  >
-                    Validar en SycTrace oficial <IconExternal />
-                  </a>
-                </div>
               </div>
             )}
           </div>
@@ -359,40 +213,60 @@ export default function VerificarTab({
             {checklistAbierto && (
               <div className="etiqueta-content fade-in">
                 <p className="etiqueta-intro">
-                  Verifica estos puntos clave en la botella antes de abrirla:
+                  Puntos que deben coincidir entre la botella y el resultado de la app externa:
                 </p>
                 <ul className="etiqueta-list">
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Estampilla departamental</strong>
-                      <small>Debe tener holograma de seguridad reflectivo y código de barras nítido.</small>
+                      <small>Debe tener holograma reflectivo de seguridad y código nítido.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Registro Sanitario INVIMA</strong>
-                      <small>Debe estar claramente impreso en la contraetiqueta con su número oficial.</small>
+                      <small>Debe estar claramente impreso en la etiqueta con su número oficial.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Calidad de impresión</strong>
-                      <small>Las etiquetas originales no tienen tintas borrosas ni esquinas despegadas.</small>
+                      <small>Las etiquetas originales no tienen tintas borrosas ni pegante casero.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Leyendas legales obligatorias</strong>
-                      <small>Debe incluir advertencias de salud y el grado alcohólico en % vol.</small>
+                      <small>Advertencias de salud y grado alcohólico en % vol legibles.</small>
                     </div>
                   </li>
                 </ul>
               </div>
             )}
+          </div>
+
+          {/* BOTÓN PARA PASAR AL PASO SIGUIENTE (REQUERIDO) */}
+          <div className="step-forward-card">
+            <button
+              id="btn-siguiente-paso-inspeccion"
+              className="btn success btn-next-step"
+              onClick={() => onNavigateTab?.('inspeccion')}
+            >
+              <span>Pasar al siguiente paso: Inspección</span>
+              <span className="next-arrow-icon">→</span>
+            </button>
+            <div className="step-backward-row">
+              <button
+                className="btn-link-step"
+                onClick={() => onNavigateTab?.('inicio')}
+              >
+                ← Volver al Inicio
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -489,11 +363,11 @@ export default function VerificarTab({
                 <li>Confirma que completaste la verificación</li>
               </ol>
 
-              <button id="btn-abrir-syctrace" className="btn primary" onClick={onAbrirSyctrace}>
+              <button id="btn-abrir-syctrace-cat" className="btn primary" onClick={onAbrirSyctrace}>
                 {abrioSyctrace ? 'Abrir SycTrace de nuevo ↗' : 'Verificar en SycTrace ↗'}
               </button>
               <button
-                id="btn-ya-verifique"
+                id="btn-ya-verifique-cat"
                 className={`btn success ${volvio ? 'pulse' : ''}`}
                 disabled={!abrioSyctrace}
                 onClick={onReiniciarPh}
@@ -510,13 +384,23 @@ export default function VerificarTab({
           {tipo && licor && ph && (
             <section className="fade-in">
               <ResultadoPh ph={ph} />
-              <button
-                id="btn-nueva-consulta"
-                className="btn primary mt-4"
-                onClick={onVolverTipo}
-              >
-                Consultar otro licor
-              </button>
+              <div className="ph-actions-row mt-4">
+                <button
+                  id="btn-ir-a-inspeccion"
+                  className="btn success btn-next-step"
+                  onClick={() => onNavigateTab?.('inspeccion')}
+                >
+                  <span>Pasar al siguiente paso: Inspección</span>
+                  <span className="next-arrow-icon">→</span>
+                </button>
+                <button
+                  id="btn-nueva-consulta-cat"
+                  className="btn ghost mt-2"
+                  onClick={onVolverTipo}
+                >
+                  Consultar otro licor
+                </button>
+              </div>
             </section>
           )}
         </div>

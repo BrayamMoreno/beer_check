@@ -64,10 +64,10 @@ a {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 0.85rem 1rem calc(92px + env(safe-area-inset-bottom, 16px));
+  padding: 0.85rem 1rem calc(94px + env(safe-area-inset-bottom, 16px));
 }
 
-/* Fondo con orbes de luz difuminada */
+/* Fondo dinámico con orbes de luz difuminada */
 .bg-orbs {
   position: fixed;
   inset: 0;
@@ -202,7 +202,7 @@ a {
   color: transparent;
 }
 
-/* Alertas globales */
+/* Alertas */
 .global-alert {
   margin-bottom: 0.85rem;
 }
@@ -568,7 +568,7 @@ a {
 }
 
 /* ========================================================
-   PANTALLA 2: VERIFICAR / ESCÁNER QR (CROQUIS)
+   PANTALLA 2: VERIFICAR CON ESCÁNER EXTERNO (CROQUIS)
    ======================================================== */
 .view-switch-pills {
   display: grid;
@@ -621,7 +621,7 @@ a {
   position: relative;
   width: 100%;
   max-width: 280px;
-  height: 220px;
+  height: 200px;
   border: 2px dashed hsla(260, 50%, 75%, 0.4);
   border-radius: 20px;
   display: flex;
@@ -629,18 +629,22 @@ a {
   justify-content: center;
   overflow: hidden;
   background: hsla(250, 40%, 10%, 0.6);
-  transition: border-color 0.3s;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scanner-viewfinder.external-scanner {
+  cursor: pointer;
+}
+
+.scanner-viewfinder.external-scanner:hover {
+  border-color: var(--amber);
+  background: hsla(250, 40%, 14%, 0.75);
+  box-shadow: 0 8px 24px hsla(38, 95%, 54%, 0.15);
 }
 
 .scanner-viewfinder.camera-on {
   border-color: var(--teal);
   border-style: solid;
-}
-
-.scanner-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .viewfinder-placeholder {
@@ -661,6 +665,16 @@ a {
   place-items: center;
   color: var(--amber);
   margin-bottom: 0.2rem;
+  transition: transform 0.3s;
+}
+
+.viewfinder-icon-wrap.external-pulse {
+  animation: pulseExternal 2.5s infinite;
+}
+
+@keyframes pulseExternal {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); box-shadow: 0 0 20px hsla(38, 95%, 54%, 0.3); }
 }
 
 .viewfinder-icon {
@@ -669,14 +683,15 @@ a {
 }
 
 .viewfinder-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: #fff;
 }
 
 .viewfinder-hint {
   font-size: 0.78rem;
   color: var(--text-muted);
-  max-width: 200px;
+  max-width: 220px;
+  line-height: 1.35;
 }
 
 /* Esquinas y láser de escaneo */
@@ -710,118 +725,35 @@ a {
   100% { top: 88%; opacity: 0.2; }
 }
 
-.scanner-actions-bar {
-  display: flex;
-  gap: 0.6rem;
+.scanner-external-launch-wrap {
   width: 100%;
-  justify-content: center;
-}
-
-.btn-action-small {
-  padding: 0.55rem 0.95rem;
-  border-radius: 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.btn-action-small:hover {
-  background: var(--surface-3);
-  border-color: var(--teal);
-}
-
-.btn-action-small.active {
-  background: hsla(168, 80%, 46%, 0.2);
-  border-color: var(--teal);
-  color: var(--teal-light);
-}
-
-.scanner-error-msg {
-  font-size: 0.78rem;
-  color: #ff9ea8;
-  text-align: center;
-}
-
-/* Formulario de código manual */
-.manual-code-form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.45rem;
 }
 
-.code-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.code-input-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.code-input {
-  flex: 1;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: hsla(250, 40%, 12%, 0.7);
-  color: #fff;
-  font: inherit;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.code-input:focus {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 4px hsla(38, 95%, 54%, 0.16);
-}
-
-.btn-code-submit {
-  padding: 0 1.25rem;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--amber), var(--amber-dark));
-  color: #1a0f00;
-  font-weight: 700;
-  font-size: 0.88rem;
-  transition: transform 0.15s;
-}
-
-.btn-code-submit:active {
-  transform: scale(0.97);
-}
-
-/* Chips de prueba */
-.demo-chips-row {
+.btn-launch-external {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.98rem;
+  padding: 1rem;
 }
 
-.demo-chips-label {
-  font-size: 0.74rem;
+.icon-btn-lead {
+  width: 18px;
+  height: 18px;
+}
+
+.external-app-notice {
+  font-size: 0.76rem;
   color: var(--text-muted);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.35;
 }
-
-.chip-btn {
-  padding: 0.25rem 0.55rem;
-  border-radius: 99px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  transition: transform 0.15s;
-}
-
-.chip-btn:active {
-  transform: scale(0.95);
-}
-
-.chip-ok { background: hsla(168, 80%, 46%, 0.18); color: var(--teal-light); border-color: hsla(168, 80%, 46%, 0.3); }
-.chip-fail { background: hsla(355, 88%, 56%, 0.18); color: #ff9ea8; border-color: hsla(355, 88%, 56%, 0.3); }
-.chip-warn { background: hsla(38, 95%, 54%, 0.18); color: var(--amber); border-color: hsla(38, 95%, 54%, 0.3); }
 
 /* Posibles resultados del croquis */
 .posibles-resultados-box {
@@ -834,10 +766,32 @@ a {
   gap: 0.85rem;
 }
 
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .section-title {
-  font-size: 0.96rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: #fff;
+}
+
+.badge-select-hint {
+  font-size: 0.72rem;
+  color: var(--amber);
+  background: hsla(38, 95%, 54%, 0.15);
+  border: 1px solid hsla(38, 95%, 54%, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.results-intro-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.35;
 }
 
 .results-pills-container {
@@ -850,11 +804,12 @@ a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.8rem 0.9rem;
   border-radius: 14px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
 
 .result-pill:hover {
@@ -875,14 +830,24 @@ a {
   height: 16px;
 }
 
+.result-pill-content {
+  flex: 1;
+}
+
 .result-pill-content strong {
   display: block;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
 }
 
 .result-pill-content p {
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   line-height: 1.3;
+}
+
+.pill-check-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-left: 0.4rem;
 }
 
 /* Verde del croquis */
@@ -899,6 +864,7 @@ a {
 
 .pill-match.selected {
   border-color: var(--teal);
+  background: hsla(168, 80%, 46%, 0.22);
   box-shadow: 0 0 0 2px hsla(168, 80%, 46%, 0.4);
 }
 
@@ -916,6 +882,7 @@ a {
 
 .pill-no-match.selected {
   border-color: var(--danger);
+  background: hsla(355, 88%, 56%, 0.22);
   box-shadow: 0 0 0 2px hsla(355, 88%, 56%, 0.4);
 }
 
@@ -933,6 +900,7 @@ a {
 
 .pill-unverified.selected {
   border-color: var(--amber);
+  background: hsla(38, 95%, 54%, 0.22);
   box-shadow: 0 0 0 2px hsla(38, 95%, 54%, 0.4);
 }
 
@@ -962,32 +930,6 @@ a {
   background: hsla(38, 95%, 54%, 0.18);
   border: 1px solid var(--amber);
   color: #ffe8c4;
-}
-
-.scan-report-actions {
-  margin-top: 0.4rem;
-}
-
-.btn-syctrace-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  padding: 0.4rem 0.8rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  transition: all 0.2s;
-}
-
-.btn-syctrace-link svg {
-  width: 14px;
-  height: 14px;
-}
-
-.btn-syctrace-link:hover {
-  background: rgba(255, 255, 255, 0.22);
 }
 
 /* Checklist de etiqueta del croquis */
@@ -1073,6 +1015,76 @@ a {
   font-size: 0.75rem;
   color: var(--text-muted);
   line-height: 1.3;
+}
+
+/* ========================================================
+   BOTONES DE NAVEGACIÓN PASO A PASO (REQUERIDO)
+   ======================================================== */
+.step-forward-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+}
+
+.btn-next-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 1.05rem 1.25rem;
+  border-radius: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.next-arrow-icon {
+  font-size: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.btn-next-step:hover .next-arrow-icon {
+  transform: translateX(4px);
+}
+
+.btn-next-step.danger {
+  background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+  color: #fff;
+  box-shadow: 0 8px 25px hsla(355, 88%, 56%, 0.35);
+}
+
+.step-backward-row {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-link-step {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  transition: color 0.2s;
+}
+
+.btn-link-step:hover {
+  color: #fff;
+}
+
+.btn-return-home {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--amber);
+  border: 1px solid hsla(38, 95%, 54%, 0.35);
+  border-radius: 14px;
+  padding: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-return-home:hover {
+  background: hsla(38, 95%, 54%, 0.12);
+  color: #fff;
 }
 
 /* Flujo de catálogo y pH */
@@ -1317,9 +1329,8 @@ a {
   50% { box-shadow: 0 0 0 12px hsla(168, 80%, 46%, 0); }
 }
 
-.mt-4 {
-  margin-top: 1rem;
-}
+.mt-2 { margin-top: 0.5rem; }
+.mt-4 { margin-top: 1rem; }
 
 /* ========================================================
    PANTALLA 3: INSPECCIÓN (CROQUIS)
@@ -1663,7 +1674,6 @@ a {
   gap: 0.65rem;
 }
 
-/* Botón prominente "Llamar al 123" del croquis */
 .btn-call-emergency {
   width: 100%;
   background: linear-gradient(135deg, var(--danger), var(--danger-dark));
@@ -2017,7 +2027,6 @@ a {
   box-shadow: 0 0 6px var(--danger);
 }
 
-/* Pestaña activa */
 .nav-tab.active {
   color: #fff;
   background: hsla(250, 40%, 25%, 0.5);

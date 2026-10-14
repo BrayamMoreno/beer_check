@@ -46,7 +46,7 @@ const SINTOMAS = [
   },
 ]
 
-export default function EmergenciaTab() {
+export default function EmergenciaTab({ onNavigateTab }) {
   const [sintomasSeleccionados, setSintomasSeleccionados] = useState({})
 
   const toggleSintoma = (id) => {
@@ -171,6 +171,24 @@ export default function EmergenciaTab() {
             </div>
           </li>
         </ul>
+      </div>
+
+      {/* Navegación de cierre / pasos */}
+      <div className="step-forward-card">
+        <button
+          className="btn ghost btn-return-home"
+          onClick={() => onNavigateTab?.('inicio')}
+        >
+          ↺ Volver al Inicio
+        </button>
+        <div className="step-backward-row">
+          <button
+            className="btn-link-step"
+            onClick={() => onNavigateTab?.('inspeccion')}
+          >
+            ← Volver al Paso 3: Inspección
+          </button>
+        </div>
       </div>
 
       <div className="step-tag-footer">4 · Emergencia</div>
