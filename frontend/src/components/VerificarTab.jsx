@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IconQr, IconCheck, IconAlert, IconInfo, IconChevron, IconExternal, IconSearch } from '../icons'
+import { IconCheck, IconAlert, IconInfo, IconChevron, IconExternal, IconSearch } from '../icons'
 import ResultadoPh, { Thumb } from './ResultadoPh'
 
 export default function VerificarTab({
@@ -23,12 +23,21 @@ export default function VerificarTab({
   onVolverLicor,
   onNavigateTab,
 }) {
-  const [activeSubView, setActiveSubView] = useState('escaner') // 'escaner' | 'catalogo'
-  const [resultadoEscaner, setResultadoEscaner] = useState(null) // null | 'coincide' | 'no-coincide' | 'no-verificado'
+  const [activeSubView, setActiveSubView] = useState('validacion') // 'validacion' | 'catalogo'
+  const [yaValido, setYaValido] = useState(volvio || false)
+  const [resultado, setResultado] = useState(null) // null | 'coincide' | 'no-coincide' | 'no-verificado'
   const [checklistAbierto, setChecklistAbierto] = useState(false)
 
-  const handleSeleccionarResultado = (res) => {
-    setResultadoEscaner(res)
+  const handleIrAValidar = () => {
+    onAbrirSyctrace()
+    // Una vez abierto, sugerimos confirmar
+  }
+
+  const handleConfirmarYaValido = () => {
+    setYaValido(true)
+    if (!resultado) {
+      setResultado('coincide') // Por defecto positivo al validar, pero puede cambiarlo
+    }
   }
 
   const licoresFiltrados = licor
@@ -41,18 +50,18 @@ export default function VerificarTab({
   return (
     <div className="tab-pane verificar-pane fade-in">
       <div className="tab-header">
-        <h1>Verificar</h1>
-        <p className="tab-subtitle">Validación del código de la botella con SycTrace</p>
+        <h1>Validar botella</h1>
+        <p className="tab-subtitle">Paso 2: Consulta el código de estampilla en la página oficial</p>
       </div>
 
-      {/* Selector de sub-vista: Escáner externo vs Catálogo y pH */}
+      {/* Selector de sub-vista: Validación externa vs Catálogo y pH */}
       <div className="view-switch-pills">
         <button
-          id="btn-subview-escaner"
-          className={`view-pill ${activeSubView === 'escaner' ? 'active' : ''}`}
-          onClick={() => setActiveSubView('escaner')}
+          id="btn-subview-validacion"
+          className={`view-pill ${activeSubView === 'validacion' ? 'active' : ''}`}
+          onClick={() => setActiveSubView('validacion')}
         >
-          <IconQr /> Escáner de botella
+          <IconCheck /> Validación en la página
         </button>
         <button
           id="btn-subview-catalogo"
@@ -63,140 +72,149 @@ export default function VerificarTab({
         </button>
       </div>
 
-      {activeSubView === 'escaner' && (
-        <div className="escaner-section fade-in">
-          {/* Tarjeta del visor de escaneo externo (fiel al croquis) */}
-          <div className="scanner-viewfinder-card">
-            <div
-              className={`scanner-viewfinder external-scanner ${abrioSyctrace ? 'camera-on' : ''}`}
-              onClick={onAbrirSyctrace}
-              title="Abrir SycTrace para escanear"
-            >
-              <div className="viewfinder-placeholder">
-                <div className="viewfinder-icon-wrap external-pulse">
-                  <IconQr className="viewfinder-icon" />
-                </div>
-                <strong className="viewfinder-title">Apunta al QR</strong>
-                <p className="viewfinder-hint">
-                  {abrioSyctrace
-                    ? '✓ Escáner abierto en SycTrace. Toca para abrir de nuevo si lo necesitas.'
-                    : 'Escaneo con la aplicación oficial SycTrace'}
-                </p>
-              </div>
-
-              <div className="scanner-corner tl" />
-              <div className="scanner-corner tr" />
-              <div className="scanner-corner bl" />
-              <div className="scanner-corner br" />
-              <div className="scanner-laser" />
+      {activeSubView === 'validacion' && (
+        <div className="validacion-section fade-in">
+          {/* Tarjeta principal de validación externa (sin lector de QR) */}
+          <div className="external-validation-card">
+            <div className="validation-card-header">
+              <div className="validation-step-badge">Paso 2 del flujo</div>
+              <h2 className="validation-card-title">Validación en la página oficial</h2>
+              <p className="validation-card-desc">
+                Para garantizar la legitimidad del licor, ingresa el código o revisa la estampilla
+                directamente en la plataforma oficial del departamento.
+              </p>
             </div>
 
-            {/* Botón principal de apertura de aplicación externa */}
-            <div className="scanner-external-launch-wrap">
-              <button
-                id="btn-abrir-escaner-externo"
-                className={`btn primary btn-launch-external ${volvio ? 'pulse' : ''}`}
-                onClick={onAbrirSyctrace}
-              >
-                <IconExternal className="icon-btn-lead" />
-                <span>{abrioSyctrace ? 'Abrir SycTrace de nuevo ↗' : 'Escanear en SycTrace ↗'}</span>
-              </button>
-              <small className="external-app-notice">
-                {abrioSyctrace
-                  ? 'Verifica el código en SycTrace y selecciona abajo qué resultado obtuviste.'
-                  : `Se abrirá la plataforma oficial (${syctraceUrl}) en una nueva pestaña.`}
-              </small>
+            {/* Acción 1: Ir a validar en la página */}
+            <div className="validation-action-block">
+              <span className="action-step-num">1</span>
+              <div className="action-step-body">
+                <strong>Consulta el código de la estampilla</strong>
+                <p>Abre la página oficial de verificación en una nueva pestaña:</p>
+                <button
+                  id="btn-ir-a-validar-pagina"
+                  className="btn primary btn-open-external-page"
+                  onClick={handleIrAValidar}
+                >
+                  <IconExternal className="icon-btn-lead" />
+                  <span>Ir a validar en la página</span>
+                </button>
+                <small className="external-url-caption">
+                  {syctraceUrl ? `Sitio web oficial: ${syctraceUrl}` : 'syctrace.org'}
+                </small>
+              </div>
+            </div>
+
+            {/* Acción 2: Ya se validó */}
+            <div className="validation-action-block">
+              <span className="action-step-num">2</span>
+              <div className="action-step-body">
+                <strong>Confirma la consulta realizada</strong>
+                <p>Una vez consultado el código en la página oficial, confirma para continuar:</p>
+                <button
+                  id="btn-ya-se-valido"
+                  className={`btn ${yaValido ? 'success validated-active' : 'secondary btn-pulse-if-opened'}`}
+                  onClick={handleConfirmarYaValido}
+                >
+                  {yaValido ? '✓ Ya se validó en la página' : 'Confirmar: Ya se validó'}
+                </button>
+                {!abrioSyctrace && !yaValido && (
+                  <small className="hint-muted">
+                    Tip: Puedes pulsar &quot;Ir a validar en la página&quot; primero o confirmar si ya lo hiciste.
+                  </small>
+                )}
+              </div>
+            </div>
+
+            {/* Acción 3: Selección del resultado obtenido en la página */}
+            <div className="validation-action-block">
+              <span className="action-step-num">3</span>
+              <div className="action-step-body">
+                <strong>¿Qué resultado arrojó la página?</strong>
+                <div className="results-pills-container mt-2">
+                  <div
+                    id="pill-res-coincide"
+                    className={`result-pill pill-match ${resultado === 'coincide' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setResultado('coincide')
+                      setYaValido(true)
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="result-pill-indicator">
+                      <IconCheck />
+                    </div>
+                    <div className="result-pill-content">
+                      <strong>Coincide con el lote</strong>
+                      <p>Estampilla registrada y autorizada para distribución legal.</p>
+                    </div>
+                    {resultado === 'coincide' && <span className="pill-check-badge">✓</span>}
+                  </div>
+
+                  <div
+                    id="pill-res-no-coincide"
+                    className={`result-pill pill-no-match ${resultado === 'no-coincide' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setResultado('no-coincide')
+                      setYaValido(true)
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="result-pill-indicator">
+                      <IconAlert />
+                    </div>
+                    <div className="result-pill-content">
+                      <strong>No coincide</strong>
+                      <p>Inconsistencia detectada o código reportado como adulterado.</p>
+                    </div>
+                    {resultado === 'no-coincide' && <span className="pill-check-badge">✓</span>}
+                  </div>
+
+                  <div
+                    id="pill-res-no-verificado"
+                    className={`result-pill pill-unverified ${resultado === 'no-verificado' ? 'selected' : ''}`}
+                    onClick={() => {
+                      setResultado('no-verificado')
+                      setYaValido(true)
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="result-pill-indicator">
+                      <IconInfo />
+                    </div>
+                    <div className="result-pill-content">
+                      <strong>No se pudo verificar</strong>
+                      <p>Código no encontrado en el sistema o registro ilegible.</p>
+                    </div>
+                    {resultado === 'no-verificado' && <span className="pill-check-badge">✓</span>}
+                  </div>
+                </div>
+
+                {resultado && (
+                  <div className={`active-scan-report alert-${resultado} mt-2`}>
+                    <strong>
+                      {resultado === 'coincide' && '✅ Verificación legal confirmada'}
+                      {resultado === 'no-coincide' && '🚨 ¡ALERTA! Código inconsistente'}
+                      {resultado === 'no-verificado' && '⚠️ Estado no confirmado'}
+                    </strong>
+                    <p>
+                      {resultado === 'coincide' &&
+                        'El código coincide con los registros departamentales. Continúa con la inspección física.'}
+                      {resultado === 'no-coincide' &&
+                        'Este código no corresponde al producto. Hay alto riesgo de adulteración. ¡NO lo consumas!'}
+                      {resultado === 'no-verificado' &&
+                        'No fue posible validar el código. Es indispensable la inspección visual con linterna a contraluz.'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Posibles resultados del croquis */}
-          <div className="posibles-resultados-box">
-            <div className="section-title-row">
-              <h3 className="section-title">Posibles resultados</h3>
-              {abrioSyctrace && <span className="badge-select-hint">Selecciona tu resultado</span>}
-            </div>
-
-            <p className="results-intro-text">
-              ¿Qué indicó la consulta en la aplicación externa?
-            </p>
-
-            <div className="results-pills-container">
-              {/* Opción 1: Coincide con el lote (Verde) */}
-              <div
-                id="pill-resultado-coincide"
-                className={`result-pill pill-match ${resultadoEscaner === 'coincide' ? 'selected' : ''}`}
-                onClick={() => handleSeleccionarResultado('coincide')}
-                role="button"
-                tabIndex={0}
-              >
-                <div className="result-pill-indicator">
-                  <IconCheck />
-                </div>
-                <div className="result-pill-content">
-                  <strong>Coincide con el lote</strong>
-                  <p>Estampilla registrada y autorizada para distribución legal.</p>
-                </div>
-                {resultadoEscaner === 'coincide' && <span className="pill-check-badge">✓</span>}
-              </div>
-
-              {/* Opción 2: No coincide (Rojo) */}
-              <div
-                id="pill-resultado-no-coincide"
-                className={`result-pill pill-no-match ${resultadoEscaner === 'no-coincide' ? 'selected' : ''}`}
-                onClick={() => handleSeleccionarResultado('no-coincide')}
-                role="button"
-                tabIndex={0}
-              >
-                <div className="result-pill-indicator">
-                  <IconAlert />
-                </div>
-                <div className="result-pill-content">
-                  <strong>No coincide</strong>
-                  <p>Inconsistencia detectada o código reportado como adulterado.</p>
-                </div>
-                {resultadoEscaner === 'no-coincide' && <span className="pill-check-badge">✓</span>}
-              </div>
-
-              {/* Opción 3: No se pudo verificar (Naranja) */}
-              <div
-                id="pill-resultado-no-verificado"
-                className={`result-pill pill-unverified ${resultadoEscaner === 'no-verificado' ? 'selected' : ''}`}
-                onClick={() => handleSeleccionarResultado('no-verificado')}
-                role="button"
-                tabIndex={0}
-              >
-                <div className="result-pill-indicator">
-                  <IconInfo />
-                </div>
-                <div className="result-pill-content">
-                  <strong>No se pudo verificar</strong>
-                  <p>Código no encontrado en el sistema o registro ilegible.</p>
-                </div>
-                {resultadoEscaner === 'no-verificado' && <span className="pill-check-badge">✓</span>}
-              </div>
-            </div>
-
-            {/* Mensaje de orientación según el resultado marcado */}
-            {resultadoEscaner && (
-              <div className={`active-scan-report alert-${resultadoEscaner}`}>
-                <strong>
-                  {resultadoEscaner === 'coincide' && '✅ Verificación exitosa en SycTrace'}
-                  {resultadoEscaner === 'no-coincide' && '🚨 ¡ALERTA! Código no coincide en SycTrace'}
-                  {resultadoEscaner === 'no-verificado' && '⚠️ Verificación no confirmada'}
-                </strong>
-                <p>
-                  {resultadoEscaner === 'coincide' &&
-                    'El lote y registro sanitario corresponden a los datos de la gobernación. Continúa con la inspección física de la botella.'}
-                  {resultadoEscaner === 'no-coincide' &&
-                    '¡Cuidado! Este código no pertenece al producto o no está autorizado. NO consumas esta bebida.'}
-                  {resultadoEscaner === 'no-verificado' &&
-                    'No se pudo confirmar en la base de datos oficial. Es fundamental realizar la inspección visual con linterna a contraluz.'}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Checklist de etiqueta del croquis */}
+          {/* Checklist de etiqueta (desplegable) */}
           <div className="etiqueta-checklist-card">
             <button
               id="btn-toggle-checklist-etiqueta"
@@ -213,35 +231,35 @@ export default function VerificarTab({
             {checklistAbierto && (
               <div className="etiqueta-content fade-in">
                 <p className="etiqueta-intro">
-                  Puntos que deben coincidir entre la botella y el resultado de la app externa:
+                  Puntos que deben coincidir entre la botella física y la página oficial:
                 </p>
                 <ul className="etiqueta-list">
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Estampilla departamental</strong>
-                      <small>Debe tener holograma reflectivo de seguridad y código nítido.</small>
+                      <small>Debe tener holograma de seguridad reflectivo y código de barras nítido.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Registro Sanitario INVIMA</strong>
-                      <small>Debe estar claramente impreso en la etiqueta con su número oficial.</small>
+                      <small>Debe estar claramente impreso en la contraetiqueta con su número oficial.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Calidad de impresión</strong>
-                      <small>Las etiquetas originales no tienen tintas borrosas ni pegante casero.</small>
+                      <small>Las etiquetas originales no tienen tintas corridas ni pegamento casero.</small>
                     </div>
                   </li>
                   <li>
                     <span className="chk-icon">🔍</span>
                     <div>
                       <strong>Leyendas legales obligatorias</strong>
-                      <small>Advertencias de salud y grado alcohólico en % vol legibles.</small>
+                      <small>Debe incluir advertencias de salud y el grado alcohólico en % vol.</small>
                     </div>
                   </li>
                 </ul>
@@ -252,11 +270,11 @@ export default function VerificarTab({
           {/* BOTÓN PARA PASAR AL PASO SIGUIENTE (REQUERIDO) */}
           <div className="step-forward-card">
             <button
-              id="btn-siguiente-paso-inspeccion"
+              id="btn-pasar-al-paso-siguiente"
               className="btn success btn-next-step"
               onClick={() => onNavigateTab?.('inspeccion')}
             >
-              <span>Pasar al siguiente paso: Inspección</span>
+              <span>Pasar al siguiente paso: Inspección de botella</span>
               <span className="next-arrow-icon">→</span>
             </button>
             <div className="step-backward-row">
@@ -264,14 +282,14 @@ export default function VerificarTab({
                 className="btn-link-step"
                 onClick={() => onNavigateTab?.('inicio')}
               >
-                ← Volver al Inicio
+                ← Volver al Paso 1: Inicio
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Sub-vista del catálogo y flujo de pH existente */}
+      {/* Sub-vista del catálogo y flujo de pH */}
       {activeSubView === 'catalogo' && (
         <div className="catalogo-ph-flow fade-in">
           {error && <div className="alert">{error}</div>}
@@ -364,7 +382,7 @@ export default function VerificarTab({
               </ol>
 
               <button id="btn-abrir-syctrace-cat" className="btn primary" onClick={onAbrirSyctrace}>
-                {abrioSyctrace ? 'Abrir SycTrace de nuevo ↗' : 'Verificar en SycTrace ↗'}
+                {abrioSyctrace ? 'Abrir SycTrace de nuevo ↗' : 'Ir a validar en la página ↗'}
               </button>
               <button
                 id="btn-ya-verifique-cat"
@@ -372,10 +390,10 @@ export default function VerificarTab({
                 disabled={!abrioSyctrace}
                 onClick={onReiniciarPh}
               >
-                ✓ Ya verifiqué mi licor
+                ✓ Ya se validó mi licor
               </button>
               {!abrioSyctrace && (
-                <small className="muted">Primero debes abrir SycTrace para desbloquear los datos.</small>
+                <small className="muted">Primero debes abrir la página para desbloquear los datos de pH.</small>
               )}
             </section>
           )}
@@ -406,7 +424,7 @@ export default function VerificarTab({
         </div>
       )}
 
-      <div className="step-tag-footer">2 · Escáner QR</div>
+      <div className="step-tag-footer">2 · Validación</div>
     </div>
   )
 }

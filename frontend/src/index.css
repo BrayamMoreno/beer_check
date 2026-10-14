@@ -276,7 +276,7 @@ a {
 }
 
 /* ========================================================
-   PANTALLA 1: INICIO (CROQUIS)
+   PANTALLA 1: INICIO
    ======================================================== */
 .disclaimer-banner {
   background: hsla(38, 95%, 54%, 0.14);
@@ -314,7 +314,11 @@ a {
   line-height: 1.4;
 }
 
-/* Botones principales de acción */
+.start-flow-card {
+  margin-top: -0.2rem;
+}
+
+/* Botones principales de acceso rápido */
 .quick-actions-grid {
   display: flex;
   flex-direction: column;
@@ -437,7 +441,7 @@ a {
   color: #fff;
 }
 
-/* Consejo del día del croquis */
+/* Consejo del día */
 .tip-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -568,7 +572,7 @@ a {
 }
 
 /* ========================================================
-   PANTALLA 2: VERIFICAR CON ESCÁNER EXTERNO (CROQUIS)
+   PANTALLA 2: VALIDACIÓN EXTERNA (SIN LECTOR DE QR)
    ======================================================== */
 .view-switch-pills {
   display: grid;
@@ -605,141 +609,100 @@ a {
   border: 1px solid var(--border);
 }
 
-/* Visor del escáner con borde discontinuo del croquis */
-.scanner-viewfinder-card {
+/* Tarjeta principal de validación externa */
+.external-validation-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1.35rem 1.15rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  gap: 1.15rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
-.scanner-viewfinder {
-  position: relative;
-  width: 100%;
-  max-width: 280px;
-  height: 200px;
-  border: 2px dashed hsla(260, 50%, 75%, 0.4);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: hsla(250, 40%, 10%, 0.6);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.scanner-viewfinder.external-scanner {
-  cursor: pointer;
-}
-
-.scanner-viewfinder.external-scanner:hover {
-  border-color: var(--amber);
-  background: hsla(250, 40%, 14%, 0.75);
-  box-shadow: 0 8px 24px hsla(38, 95%, 54%, 0.15);
-}
-
-.scanner-viewfinder.camera-on {
-  border-color: var(--teal);
-  border-style: solid;
-}
-
-.viewfinder-placeholder {
+.validation-card-header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.4rem;
-  padding: 1rem;
+  gap: 0.35rem;
 }
 
-.viewfinder-icon-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: hsla(250, 40%, 20%, 0.8);
-  display: grid;
-  place-items: center;
+.validation-step-badge {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 99px;
+  background: hsla(38, 95%, 54%, 0.15);
   color: var(--amber);
-  margin-bottom: 0.2rem;
-  transition: transform 0.3s;
+  border: 1px solid hsla(38, 95%, 54%, 0.3);
 }
 
-.viewfinder-icon-wrap.external-pulse {
-  animation: pulseExternal 2.5s infinite;
-}
-
-@keyframes pulseExternal {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); box-shadow: 0 0 20px hsla(38, 95%, 54%, 0.3); }
-}
-
-.viewfinder-icon {
-  width: 30px;
-  height: 30px;
-}
-
-.viewfinder-title {
-  font-size: 1.15rem;
+.validation-card-title {
+  font-size: 1.25rem;
+  font-weight: 800;
   color: #fff;
 }
 
-.viewfinder-hint {
-  font-size: 0.78rem;
+.validation-card-desc {
+  font-size: 0.83rem;
   color: var(--text-muted);
-  max-width: 220px;
+  line-height: 1.45;
+}
+
+.validation-action-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.action-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: 2px solid var(--teal);
+  color: var(--teal-light);
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.action-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.action-step-body strong {
+  font-size: 0.94rem;
+  color: #fff;
+}
+
+.action-step-body p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
   line-height: 1.35;
 }
 
-/* Esquinas y láser de escaneo */
-.scanner-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border-color: var(--teal-light);
-  border-style: solid;
-  pointer-events: none;
-}
-
-.scanner-corner.tl { top: 8px; left: 8px; border-width: 3px 0 0 3px; border-top-left-radius: 6px; }
-.scanner-corner.tr { top: 8px; right: 8px; border-width: 3px 3px 0 0; border-top-right-radius: 6px; }
-.scanner-corner.bl { bottom: 8px; left: 8px; border-width: 0 0 3px 3px; border-bottom-left-radius: 6px; }
-.scanner-corner.br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; border-bottom-right-radius: 6px; }
-
-.scanner-laser {
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--teal-light), transparent);
-  box-shadow: 0 0 10px var(--teal-light);
-  animation: scanLaser 2.2s ease-in-out infinite alternate;
-}
-
-@keyframes scanLaser {
-  0% { top: 12%; opacity: 0.2; }
-  50% { opacity: 1; }
-  100% { top: 88%; opacity: 0.2; }
-}
-
-.scanner-external-launch-wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.btn-launch-external {
+.btn-open-external-page {
+  margin-top: 0.4rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.98rem;
-  padding: 1rem;
+  padding: 0.95rem 1rem;
+  font-size: 0.95rem;
 }
 
 .icon-btn-lead {
@@ -747,57 +710,47 @@ a {
   height: 18px;
 }
 
-.external-app-notice {
-  font-size: 0.76rem;
+.external-url-caption {
+  font-size: 0.74rem;
+  color: var(--teal-light);
+  opacity: 0.85;
+}
+
+.btn-pulse-if-opened {
+  background: var(--surface-3);
+  border: 1px solid hsla(168, 80%, 46%, 0.4);
+  color: var(--teal-light);
+  padding: 0.9rem;
+  font-size: 0.92rem;
+  margin-top: 0.4rem;
+  transition: all 0.2s;
+}
+
+.btn-pulse-if-opened:hover {
+  background: hsla(168, 80%, 46%, 0.15);
+}
+
+.validated-active {
+  margin-top: 0.4rem;
+  background: linear-gradient(135deg, var(--teal), hsl(185, 75%, 45%));
+  color: #022520;
+  box-shadow: 0 6px 20px hsla(168, 80%, 46%, 0.35);
+  font-weight: 800;
+  padding: 0.9rem;
+}
+
+.hint-muted {
+  font-size: 0.74rem;
   color: var(--text-muted);
-  text-align: center;
-  max-width: 320px;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 /* Posibles resultados del croquis */
-.posibles-resultados-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1.15rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.section-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.section-title {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-.badge-select-hint {
-  font-size: 0.72rem;
-  color: var(--amber);
-  background: hsla(38, 95%, 54%, 0.15);
-  border: 1px solid hsla(38, 95%, 54%, 0.3);
-  padding: 0.15rem 0.5rem;
-  border-radius: 99px;
-  font-weight: 600;
-}
-
-.results-intro-text {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.35;
-}
-
 .results-pills-container {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  width: 100%;
 }
 
 .result-pill {
@@ -908,7 +861,6 @@ a {
 .active-scan-report {
   border-radius: 14px;
   padding: 0.95rem 1rem;
-  margin-top: 0.35rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -1320,6 +1272,12 @@ a {
   box-shadow: 0 8px 25px hsla(168, 80%, 46%, 0.28);
 }
 
+.btn.secondary {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
 .btn.pulse {
   animation: pulseSuccess 1.8s infinite;
 }
@@ -1333,7 +1291,7 @@ a {
 .mt-4 { margin-top: 1rem; }
 
 /* ========================================================
-   PANTALLA 3: INSPECCIÓN (CROQUIS)
+   PANTALLA 3: INSPECCIÓN
    ======================================================== */
 .torch-action-card {
   display: flex;
@@ -1468,7 +1426,7 @@ a {
   line-height: 1.5;
 }
 
-/* Checklist interactivo del croquis */
+/* Checklist interactivo */
 .checklist-container {
   display: flex;
   flex-direction: column;
@@ -1666,7 +1624,7 @@ a {
 }
 
 /* ========================================================
-   PANTALLA 4: EMERGENCIA (CROQUIS)
+   PANTALLA 4: EMERGENCIA
    ======================================================== */
 .emergency-call-card {
   display: flex;
@@ -1759,7 +1717,7 @@ a {
   border-color: var(--danger);
 }
 
-/* Síntomas de alarma del croquis */
+/* Síntomas de alarma */
 .sintomas-section {
   display: flex;
   flex-direction: column;

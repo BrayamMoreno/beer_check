@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IconQr, IconTorch, IconPhone, IconAlert, IconChevron } from '../icons'
+import { IconCheck, IconTorch, IconPhone, IconAlert, IconChevron } from '../icons'
 
 const CONSEJOS = [
   'Revisa el sello de la tapa antes de pagar. El anillo de seguridad no debe estar roto.',
@@ -23,7 +23,7 @@ export default function InicioTab({ onNavigateTab }) {
         <p className="tab-subtitle">Tu guía para verificar y consumir seguro</p>
       </div>
 
-      {/* Banner de advertencia del croquis */}
+      {/* Banner de advertencia */}
       <div className="disclaimer-banner" role="alert">
         <span className="disclaimer-icon">
           <IconAlert />
@@ -34,20 +34,32 @@ export default function InicioTab({ onNavigateTab }) {
         </div>
       </div>
 
-      {/* Botones principales de acceso rápido del croquis */}
+      {/* Botón destacado para comenzar el flujo paso a paso */}
+      <div className="start-flow-card">
+        <button
+          id="btn-iniciar-flujo"
+          className="btn primary btn-next-step"
+          onClick={() => onNavigateTab('verificar')}
+        >
+          <span>Iniciar verificación de botella</span>
+          <span className="next-arrow-icon">→</span>
+        </button>
+      </div>
+
+      {/* Botones principales de acceso rápido */}
       <div className="quick-actions-grid">
         <button
-          id="btn-inicio-escanear-qr"
+          id="btn-inicio-validar-codigo"
           className="action-card action-verificar"
           onClick={() => onNavigateTab('verificar')}
         >
           <div className="action-icon-pill">
-            <IconQr />
+            <IconCheck />
           </div>
           <div className="action-info">
             <span className="action-step-badge">Paso 2</span>
-            <span className="action-title">Escanear QR</span>
-            <small className="action-desc">Verifica código de estampilla y lote</small>
+            <span className="action-title">Validar en la página</span>
+            <small className="action-desc">Consulta el código en la web oficial SycTrace</small>
           </div>
           <span className="action-arrow">
             <IconChevron />
@@ -91,7 +103,7 @@ export default function InicioTab({ onNavigateTab }) {
         </button>
       </div>
 
-      {/* Consejo del día del croquis */}
+      {/* Consejo del día */}
       <div className="tip-card">
         <div className="tip-card-header">
           <div className="tip-tag">
@@ -119,35 +131,35 @@ export default function InicioTab({ onNavigateTab }) {
         </div>
       </div>
 
-      {/* Resumen de pasos del croquis */}
+      {/* Resumen de la ruta guiada */}
       <div className="flow-card">
         <h3 className="flow-title">Ruta de seguridad recomendada</h3>
         <ol className="flow-steps">
           <li>
             <span className="flow-num">1</span>
             <div>
-              <strong>Revisión visual inicial</strong>
-              <p>Confirma que el envase y la etiqueta no presenten adulteraciones visibles.</p>
+              <strong>Inicio y advertencias</strong>
+              <p>Conoce los puntos básicos antes de descorchar o comprar.</p>
             </div>
           </li>
           <li>
             <span className="flow-num">2</span>
             <div>
-              <strong>Escáner de código</strong>
-              <p>Comprueba la estampilla oficial y consulta las propiedades de pH.</p>
+              <strong>Validación externa en SycTrace</strong>
+              <p>Abre la página oficial, consulta la estampilla y confirma la validación.</p>
             </div>
           </li>
           <li>
             <span className="flow-num">3</span>
             <div>
-              <strong>Prueba a contraluz</strong>
+              <strong>Inspección física a contraluz</strong>
               <p>Activa la linterna y detecta turbidez o partículas extrañas.</p>
             </div>
           </li>
           <li>
             <span className="flow-num">4</span>
             <div>
-              <strong>Respuesta inmediata</strong>
+              <strong>Respuesta inmediata de emergencia</strong>
               <p>Ante cualquier malestar o sospecha, llama al 123 sin demora.</p>
             </div>
           </li>
