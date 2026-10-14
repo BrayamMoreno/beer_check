@@ -1427,41 +1427,84 @@ a {
 }
 
 /* Checklist interactivo */
+/* Checklist interactivo de inspección */
 .checklist-container {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.75rem;
+}
+
+.checklist-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .checklist-title {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: #fff;
+}
+
+.checklist-subhead {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.btn-quick-check {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 99px;
+  background: hsla(168, 80%, 46%, 0.18);
+  border: 1px solid hsla(168, 80%, 46%, 0.35);
+  color: var(--teal-light);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-quick-check:hover {
+  background: hsla(168, 80%, 46%, 0.3);
+  color: #fff;
+}
+
+.criterios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
 .checklist-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.9rem;
-  padding: 0.95rem 1rem;
+  gap: 0.85rem;
+  padding: 0.85rem 0.95rem;
   border-radius: var(--radius-md);
-  background: var(--surface);
   border: 1px solid var(--border);
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.checklist-item:hover {
-  background: var(--surface-2);
-}
-
 .checklist-item input[type='checkbox'] {
   width: 22px;
   height: 22px;
-  accent-color: var(--danger);
+  accent-color: var(--teal);
   margin-top: 2px;
   cursor: pointer;
   border-radius: 6px;
+}
+
+.checklist-item.item-cumple {
+  background: hsla(168, 80%, 46%, 0.12);
+  border-color: hsla(168, 80%, 46%, 0.35);
+}
+
+.checklist-item.item-pendiente {
+  background: var(--surface);
+  border-color: var(--border);
+  opacity: 0.85;
 }
 
 .checklist-item-content {
@@ -1471,36 +1514,156 @@ a {
   flex: 1;
 }
 
+.criterio-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
 .checklist-item-content strong {
-  font-size: 0.96rem;
+  font-size: 0.92rem;
   color: #fff;
 }
 
 .checklist-item-content small {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.35;
 }
 
-.checklist-item.danger-checked {
-  background: hsla(355, 88%, 56%, 0.15);
-  border-color: hsla(355, 88%, 56%, 0.45);
+.badge-cumple {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--teal-light);
+  background: hsla(168, 80%, 46%, 0.2);
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  border: 1px solid hsla(168, 80%, 46%, 0.3);
 }
 
-.checklist-item.danger-checked strong {
+.badge-pendiente {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: hsla(250, 40%, 25%, 0.4);
+  padding: 0.15rem 0.45rem;
+  border-radius: 99px;
+}
+
+.report-issue-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.btn-reportar-toggle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  transition: all 0.2s;
+  background: transparent;
+  border: 1px dashed var(--border);
+}
+
+.btn-reportar-toggle:hover {
   color: #ff9ea8;
+  border-color: var(--danger);
 }
 
-/* Tarjeta de riesgo */
+.btn-reportar-toggle.active {
+  background: hsla(355, 88%, 56%, 0.18);
+  border-color: var(--danger);
+  color: #ff8593;
+  font-weight: 700;
+}
+
+/* Tarjeta de resultado y evaluación de riesgo */
 .risk-result-card {
   border-radius: var(--radius-md);
-  padding: 1.15rem;
+  padding: 1.25rem 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.75rem;
   transition: all 0.3s;
 }
 
+/* Estado aprobado: Puedes beber con normalidad */
+.risk-aprobado {
+  background: linear-gradient(135deg, hsla(168, 80%, 46%, 0.18), hsla(185, 75%, 45%, 0.1));
+  border: 1px solid var(--teal);
+  box-shadow: 0 10px 30px hsla(168, 80%, 46%, 0.2);
+}
+
+.risk-badge-aprobado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--teal-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.risk-badge-aprobado svg {
+  width: 18px;
+  height: 18px;
+}
+
+.drink-safe-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.drink-safe-banner strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #bbf7e8;
+  line-height: 1.35;
+}
+
+.drink-safe-banner p {
+  font-size: 0.82rem;
+  color: #e5e0ff;
+  line-height: 1.4;
+}
+
+/* Aviso legal explícito del 100% solicitado */
+.disclaimer-100-box {
+  background: hsla(38, 95%, 54%, 0.14);
+  border: 1px solid hsla(38, 95%, 54%, 0.35);
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.disclaimer-100-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.disclaimer-100-box strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--amber);
+  margin-bottom: 0.15rem;
+}
+
+.disclaimer-100-box p {
+  font-size: 0.78rem;
+  color: #ffeed8;
+  line-height: 1.4;
+}
+
+/* Estado peligro / anomalía */
 .risk-danger {
   background: hsla(355, 88%, 56%, 0.18);
   border: 1px solid var(--danger);
@@ -1538,27 +1701,23 @@ a {
   line-height: 1.35;
 }
 
-.risk-clean {
-  background: hsla(168, 80%, 46%, 0.12);
-  border: 1px solid hsla(168, 80%, 46%, 0.3);
+/* Estado parcial / en curso */
+.risk-parcial {
+  background: hsla(38, 95%, 54%, 0.12);
+  border: 1px solid hsla(38, 95%, 54%, 0.3);
 }
 
-.risk-badge-clean {
+.risk-badge-parcial {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--teal-light);
-}
-
-.risk-badge-clean svg {
-  width: 18px;
-  height: 18px;
+  color: var(--amber);
 }
 
 .risk-msg {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   line-height: 1.45;
   color: #e5e0ff;
 }

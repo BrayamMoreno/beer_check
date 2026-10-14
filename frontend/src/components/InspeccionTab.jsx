@@ -1,20 +1,56 @@
 import { useState, useRef, useEffect } from 'react'
 import { IconTorch, IconAlert, IconCheck } from '../icons'
 
+const CRITERIOS_CONFORMIDAD = [
+  {
+    id: 'cristalino',
+    titulo: 'Líquido limpio y cristalino',
+    detalle: 'Sin turbidez ni aspecto lechoso u opaco a contraluz.',
+    beneficio: 'Cumple: Buena transparencia',
+  },
+  {
+    id: 'sin_particulas',
+    titulo: 'Libre de partículas y sedimentos',
+    detalle: 'Al agitar suave formando un remolino, no flotan residuos, pelusas ni impurezas.',
+    beneficio: 'Cumple: Sin cuerpos extraños',
+  },
+  {
+    id: 'color_normal',
+    titulo: 'Color normal y uniforme',
+    detalle: 'El tono es característico del licor, sin decoloración ni tintes extraños.',
+    beneficio: 'Cumple: Color natural',
+  },
+  {
+    id: 'tapa_sellada',
+    titulo: 'Tapa y precinto de fábrica',
+    detalle: 'El anillo de seguridad no gira en falso ni presenta rastros de pegante casero.',
+    beneficio: 'Cumple: Sello intacto',
+  },
+  {
+    id: 'sin_fugas',
+    titulo: 'Sin fugas al voltear',
+    detalle: 'Al poner la botella boca abajo no gotea ni filtra líquido por la tapa.',
+    beneficio: 'Cumple: Cierre hermético seguro',
+  },
+]
+
 export default function InspeccionTab({ onNavigateTab }) {
   const [linternaEncendida, setLinternaEncendida] = useState(false)
   const [modoContraluz, setModoContraluz] = useState(false)
   const [fondoContraluz, setFondoContraluz] = useState('blanco') // 'blanco' | 'negro'
   const [errorTorch, setErrorTorch] = useState('')
 
-  // Checklist de anomalías del croquis
-  const [checks, setChecks] = useState({
-    turbidez: false,
-    particulas: false,
-    colorAnormal: false,
-    tapaDañada: false,
-    fugas: false,
+  // Checklist de cumplimiento positivo ("Cumple / No tiene problemas")
+  const [cumplidos, setCumplidos] = useState({
+    cristalino: true,
+    sin_particulas: true,
+    color_normal: true,
+    tapa_sellada: true,
+    sin_fugas: true,
   })
+
+  // Modo para reportar anomalía si el usuario ve algo extraño
+  const [reportaAnomalia, setReportaAnomalia] = useState(false)
 
   const streamRef = useRef(null)
 
@@ -68,11 +104,23 @@ export default function InspeccionTab({ onNavigateTab }) {
     }
   }
 
-  const handleToggleCheck = (key) => {
-    setChecks((prev) => ({ ...prev, [key]: !prev[key] }))
+  const handleToggleCriterio = (id) => {
+    setCumplidos((prev) => ({ ...prev, [id]: !prev[id] }))
+    if (reportaAnomalia) setReportaAnomalia(false)
   }
 
-  const totalAnomalias = Object.values(checks).filter(Boolean).length
+  const handleMarcarTodos = (valor) => {
+    const nuevo = {}
+    CRITERIOS_CONFORMIDAD.forEach((c) => {
+      nuevo[c.id] = valor
+    })
+    setCumplidos(nuevo)
+    if (valor) setReportaAnomalia(false)
+  }
+
+  const totalCriterios = CRITERIOS_CONFORMIDAD.length
+  const numCumplidos = Object.values(cumplidos).filter(Boolean).length
+  const todosCumplen = numCumplidos === totalCriterios && !reportaAnomalia
 
   return (
     <div className="tab-pane inspeccion-pane fade-in">
@@ -105,11 +153,11 @@ export default function InspeccionTab({ onNavigateTab }) {
       )}
 
       <div className="tab-header">
-        <h1>Inspección</h1>
-        <p className="tab-subtitle">Prueba física y óptica de la botella</p>
+        <h1>Inspección de botella</h1>
+        <p className="tab-subtitle">Paso 3: Verificación óptica con linterna y contraluz</p>
       </div>
 
-      {/* Botón principal del croquis: Encender linterna */}
+      {/* Botón principal: Encender linterna */}
       <div className="torch-action-card">
         <button
           id="btn-encender-linterna"
@@ -139,104 +187,146 @@ export default function InspeccionTab({ onNavigateTab }) {
         {errorTorch && <div className="alert-inline-notice">{errorTorch}</div>}
       </div>
 
-      {/* Instrucción textual del croquis: Contraluz, fondo blanco y negro, agita suave */}
+      {/* Instrucción del método a contraluz */}
       <div className="inspection-instruction-banner">
-        <div className="instruction-badge">Método recomendado</div>
+        <div className="instruction-badge">Técnica de inspección</div>
         <p className="instruction-lead">
           <strong>Contraluz, fondo blanco y negro, agita suave.</strong>
         </p>
         <p className="instruction-steps">
-          1. Ilumina la botella por detrás.
+          1. Ilumina la botella por detrás con la linterna o la pantalla.
           <br />
-          2. Gírala boca abajo y agita formando un remolino lento.
+          2. Gírala boca abajo suavemente formando un pequeño remolino.
           <br />
-          3. Observa si suben burbujas anómalas o sedimentos.
+          3. Observa que el líquido esté cristalino y los sellos sin daños.
         </p>
       </div>
 
-      {/* Checklist interactivo del croquis */}
+      {/* Checklist positivo: "Cumple / No tiene problemas" */}
       <div className="checklist-container">
-        <h3 className="checklist-title">Señales de alerta a verificar:</h3>
-
-        <label className={`checklist-item ${checks.turbidez ? 'danger-checked' : ''}`}>
-          <input
-            type="checkbox"
-            id="check-turbidez"
-            checked={checks.turbidez}
-            onChange={() => handleToggleCheck('turbidez')}
-          />
-          <div className="checklist-item-content">
-            <strong>Turbidez</strong>
-            <small>El licor no es cristalino; luce opaco, lechoso o sin brillo.</small>
+        <div className="checklist-header-row">
+          <div>
+            <h3 className="checklist-title">Puntos de inspección visual:</h3>
+            <small className="checklist-subhead">
+              Marca los criterios que cumple la botella sin problemas:
+            </small>
           </div>
-        </label>
+          <button
+            id="btn-marcar-todos-conforme"
+            className="btn-quick-check"
+            onClick={() => handleMarcarTodos(!todosCumplen)}
+          >
+            {todosCumplen ? 'Desmarcar todos' : '✓ Cumple todo'}
+          </button>
+        </div>
 
-        <label className={`checklist-item ${checks.particulas ? 'danger-checked' : ''}`}>
-          <input
-            type="checkbox"
-            id="check-particulas"
-            checked={checks.particulas}
-            onChange={() => handleToggleCheck('particulas')}
-          />
-          <div className="checklist-item-content">
-            <strong>Partículas</strong>
-            <small>Se aprecian sedimentos flotando, fibras, pelusas o impurezas al fondo.</small>
-          </div>
-        </label>
+        <div className="criterios-list">
+          {CRITERIOS_CONFORMIDAD.map((c) => {
+            const isChecked = !!cumplidos[c.id] && !reportaAnomalia
+            return (
+              <label
+                key={c.id}
+                id={`check-criterio-${c.id}`}
+                className={`checklist-item ${isChecked ? 'item-cumple' : 'item-pendiente'}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => handleToggleCriterio(c.id)}
+                />
+                <div className="checklist-item-content">
+                  <div className="criterio-title-row">
+                    <strong>{c.titulo}</strong>
+                    {isChecked ? (
+                      <span className="badge-cumple">Cumple ✓</span>
+                    ) : (
+                      <span className="badge-pendiente">Pendiente</span>
+                    )}
+                  </div>
+                  <small>{c.detalle}</small>
+                </div>
+              </label>
+            )
+          })}
+        </div>
 
-        <label className={`checklist-item ${checks.colorAnormal ? 'danger-checked' : ''}`}>
-          <input
-            type="checkbox"
-            id="check-color-anormal"
-            checked={checks.colorAnormal}
-            onChange={() => handleToggleCheck('colorAnormal')}
-          />
-          <div className="checklist-item-content">
-            <strong>Color anormal</strong>
-            <small>El tono luce amarillento, desteñido o distinto al licor original.</small>
-          </div>
-        </label>
-
-        <label className={`checklist-item ${checks.tapaDañada ? 'danger-checked' : ''}`}>
-          <input
-            type="checkbox"
-            id="check-tapa-danada"
-            checked={checks.tapaDañada}
-            onChange={() => handleToggleCheck('tapaDañada')}
-          />
-          <div className="checklist-item-content">
-            <strong>Tapa o precinto forzado</strong>
-            <small>El anillo de seguridad gira en falso o tiene rastros de pegamento artesanal.</small>
-          </div>
-        </label>
+        {/* Botón para reportar anomalía si encuentra un defecto */}
+        <div className="report-issue-row">
+          <button
+            id="btn-reportar-anomalia"
+            className={`btn-reportar-toggle ${reportaAnomalia ? 'active' : ''}`}
+            onClick={() => setReportaAnomalia((v) => !v)}
+          >
+            {reportaAnomalia
+              ? '✕ Quitar reporte de anomalía'
+              : '⚠️ ¿Notaste alguna turbidez, partícula o anomalía? Toca aquí'}
+          </button>
+        </div>
       </div>
 
-      {/* Evaluación de riesgo */}
-      <div className={`risk-result-card ${totalAnomalias > 0 ? 'risk-danger' : 'risk-clean'}`}>
-        {totalAnomalias > 0 ? (
+      {/* Evaluación de resultado visual */}
+      <div
+        className={`risk-result-card ${
+          reportaAnomalia
+            ? 'risk-danger'
+            : todosCumplen
+            ? 'risk-aprobado'
+            : 'risk-parcial'
+        }`}
+      >
+        {reportaAnomalia ? (
           <>
             <div className="risk-header">
               <span className="risk-badge-danger">
-                <IconAlert /> ¡PELIGRO DETECTADO!
+                <IconAlert /> ¡ANOMALÍA DETECTADA!
               </span>
             </div>
             <p className="risk-msg">
-              Has marcado <strong>{totalAnomalias} anomalía(s)</strong> físicas. Hay un alto riesgo de
-              que este licor sea adulterado o reembotellado.
+              Has reportado una anomalía física en la botella (turbidez, partículas o sello forzado).
+              Existe un alto riesgo de que este licor haya sido adulterado o reembotellado.
             </p>
             <div className="risk-action-note">
-              ⛔ <strong>NO lo consumas.</strong> Exige el cambio de la botella y avisa al personal del establecimiento.
+              ⛔ <strong>NO consumas esta bebida.</strong> Solicita el cambio inmediato y avisa a las autoridades.
+            </div>
+          </>
+        ) : todosCumplen ? (
+          <>
+            <div className="risk-header">
+              <span className="risk-badge-aprobado">
+                <IconCheck /> Inspección visual superada
+              </span>
+            </div>
+            <div className="drink-safe-banner">
+              <strong>🎉 No tiene problemas en la inspección visual: puedes beber con normalidad</strong>
+              <p>
+                El líquido se encuentra limpio, cristalino, con color homogéneo y la tapa conserva su
+                precinto de fábrica.
+              </p>
+            </div>
+
+            {/* Aviso legal solicitado textualmente */}
+            <div className="disclaimer-100-box">
+              <span className="disclaimer-100-icon">⚠️</span>
+              <div>
+                <strong>Aviso importante de seguridad:</strong>
+                <p>
+                  Este aplicativo no confirma al 100% que sea un alcohol verídico ni sustituye un
+                  análisis químico de laboratorio. Consume con precaución y responsabilidad; ante
+                  cualquier sabor u olor sospechoso, detén el consumo de inmediato.
+                </p>
+              </div>
             </div>
           </>
         ) : (
           <>
             <div className="risk-header">
-              <span className="risk-badge-clean">
-                <IconCheck /> Sin anomalías marcadas
+              <span className="risk-badge-parcial">
+                <IconAlert /> Verificación en curso ({numCumplidos}/{totalCriterios} puntos cumplidos)
               </span>
             </div>
             <p className="risk-msg">
-              El aspecto visual preliminar luce adecuado. Recuerda verificar también el código QR de la estampilla.
+              Revisa cada punto a contraluz. Si la botella está en óptimas condiciones, marca los
+              criterios faltantes o pulsa <strong>&quot;✓ Cumple todo&quot;</strong>.
             </p>
           </>
         )}
@@ -246,7 +336,7 @@ export default function InspeccionTab({ onNavigateTab }) {
       <div className="step-forward-card">
         <button
           id="btn-siguiente-paso-emergencia"
-          className="btn danger btn-next-step"
+          className="btn primary btn-next-step"
           onClick={() => onNavigateTab?.('emergencia')}
         >
           <span>Pasar al siguiente paso: Emergencia y síntomas</span>
@@ -257,7 +347,7 @@ export default function InspeccionTab({ onNavigateTab }) {
             className="btn-link-step"
             onClick={() => onNavigateTab?.('verificar')}
           >
-            ← Volver al Paso 2: Verificar
+            ← Volver al Paso 2: Validación
           </button>
         </div>
       </div>
